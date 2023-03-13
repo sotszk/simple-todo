@@ -6,7 +6,7 @@
     "moduleResolution": "node",
     "isolatedModules": true,
     "strict": true,
-    "outDir": "./dist",
+    "outDir": "./dist"
     /* parcel doesn't support baseUrl and paths */
     // "baseUrl": "src",
     // "paths": {

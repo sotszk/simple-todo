@@ -9,11 +9,13 @@
     "prebuild": "rm -rf ./dist",
     "dev": "parcel src/index.html",
     "predev": "rm -rf ./dist",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@parcel/transformer-typescript-tsc": "^2.8.3",
     "parcel": "^2.8.3",
+    "prettier": "^2.8.4",
     "typescript": "^4.9.5"
   }
 }

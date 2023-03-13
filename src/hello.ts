@@ -1,1 +1,1 @@
-export type Hello = 'Hello, world!';
+export type Hello = "Hello, world!";
