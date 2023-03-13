@@ -1,0 +1,10 @@
+{
+  "name": "simple-todo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "SotaSuzuki <3.3sota.suzuki@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  }
+}
