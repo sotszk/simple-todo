@@ -12,7 +12,7 @@ Vanilla JS によるシンプルな TODO アプリを実装します
 ### Todo App
 
 - [x] 環境構築 - バンドラの設定をする
-- [ ] 環境構築 - linter, prettier のセットアップ
+- [x] 環境構築 - linter, prettier のセットアップ
   - linter には xo を使用する
 - [x] エントリーポイントの実装
 - [ ] MUI をセットアップ
