@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "lib": ["DOM", "ES2016"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "outDir": "./dist",
+    "baseUrl": "src",
+    "paths": {
+      "@lib/*": ["lib/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": []
+}
