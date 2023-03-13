@@ -4,12 +4,14 @@
     "lib": ["DOM", "ES2016"],
     "module": "esnext",
     "moduleResolution": "node",
+    "isolatedModules": true,
     "strict": true,
     "outDir": "./dist",
-    "baseUrl": "src",
-    "paths": {
-      "@lib/*": ["lib/*"]
-    }
+    /* parcel doesn't support baseUrl and paths */
+    // "baseUrl": "src",
+    // "paths": {
+    //   "@lib/*": ["lib/*"]
+    // }
   },
   "include": ["src/**/*"],
   "exclude": []

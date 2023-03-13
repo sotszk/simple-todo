@@ -5,10 +5,15 @@
   "author": "SotaSuzuki <3.3sota.suzuki@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "prebuild": "rm -rf ./dist"
+    "build": "parcel build src/index.html",
+    "prebuild": "rm -rf ./dist",
+    "dev": "parcel src/index.html",
+    "predev": "rm -rf ./dist",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@parcel/transformer-typescript-tsc": "^2.8.3",
+    "parcel": "^2.8.3",
     "typescript": "^4.9.5"
   }
 }

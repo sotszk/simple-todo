@@ -1,5 +1,5 @@
 import type { Hello } from "./hello";
-import { add } from "@lib/add"
+import { add } from "./lib/add"
 
 const hello: Hello = 'Hello, world!';
 const myHello: string = hello;
