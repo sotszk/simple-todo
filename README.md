@@ -15,8 +15,7 @@ Vanilla JS によるシンプルな TODO アプリを実装します
 - [x] 環境構築 - linter, prettier のセットアップ
   - linter には xo を使用する
 - [x] エントリーポイントの実装
-- [ ] MUI をセットアップ
-- [ ] MUI で Todo App の見た目を整える
+- [x] Todo App の見た目を整える
 
 ### TypeScript キャッチアップ
 
