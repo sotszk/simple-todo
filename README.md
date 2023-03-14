@@ -16,6 +16,9 @@ Vanilla JS によるシンプルな TODO アプリを実装します
   - linter には xo を使用する
 - [x] エントリーポイントの実装
 - [x] Todo App の見た目を整える
+- [ ] とりあえず動くものを考えて実装してみる
+- [ ] JS Primer の実装をみる
+- [ ] Todo App のブラッシュアップ
 
 ### TypeScript キャッチアップ
 
