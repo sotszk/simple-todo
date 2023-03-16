@@ -44,12 +44,14 @@ export class App {
   mount() {
     const todoCountElement = document.querySelector<HTMLElement>('#js-todo-count');
     const formElement = document.querySelector<HTMLFormElement>('#js-form');
-    const todoListElement = document.querySelector<HTMLDivElement>('#js-todo-list');
+    const todoListContainerElement = document.querySelector<HTMLDivElement>('#js-todo-list');
 
-    if (!todoCountElement || !formElement || !todoListElement) {
+    if (!todoCountElement || !formElement || !todoListContainerElement) {
       console.log('necessary elements does not found');
       return;
     }
+
+    todoListContainerElement.innerHTML = '<ul></ul>';
 
     const updateCount = () => {
       if (!todoCountElement?.textContent) {
@@ -68,7 +70,7 @@ export class App {
     }};
 
     const appendTodoElementSubscribeEvent: AddedSubscribeEvent = {type: 'added', callback: item => {
-      const newElement = document.createElement('div');
+      const newElement = document.createElement('li');
       newElement.textContent = item.content;
       newElement.id = `todo-item-${item.id}`;
 
@@ -95,7 +97,7 @@ export class App {
 
       newElement.append(checkboxElement);
       newElement.append(deleteButtonElement);
-      todoListElement.append(newElement);
+      todoListContainerElement.lastChild?.appendChild(newElement);
     }};
 
     this.subscribe(updateCountSubscribeEvent);
