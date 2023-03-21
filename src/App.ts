@@ -1,3 +1,5 @@
+import {render} from './dom/render';
+
 console.log('App.ts: loaded');
 
 export type TodoItem = {
@@ -95,9 +97,12 @@ export class App {
         this.delete(item.id);
       });
 
-      newElement.append(checkboxElement);
-      newElement.append(deleteButtonElement);
-      todoListContainerElement.lastChild?.appendChild(newElement);
+      render(checkboxElement, newElement);
+      render(deleteButtonElement, newElement);
+
+      if (todoListContainerElement.lastElementChild) {
+        render(newElement, todoListContainerElement.lastElementChild);
+      }
     }};
 
     this.subscribe(updateCountSubscribeEvent);
