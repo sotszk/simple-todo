@@ -18,7 +18,10 @@
     "prettier": false,
     "rules": {
       "import/extensions": "off",
-      "unicorn/filename-case": "off"
+      "unicorn/filename-case": "off",
+      "capitalized-comments": "off",
+      "unicorn/no-array-for-each": "off",
+      "curly": "off"
     }
   },
   "devDependencies": {

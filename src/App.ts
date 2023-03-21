@@ -1,5 +1,3 @@
-import {render} from './dom/render';
-
 console.log('App.ts: loaded');
 
 export type TodoItem = {
@@ -9,19 +7,9 @@ export type TodoItem = {
   completed: boolean;
 };
 
-export type AddedSubscribeEvent = {type: 'added'; callback: (item: TodoItem) => void};
-export type DeletedSubscribeEvent = {type: 'deleted'; callback: (item: TodoItem) => void};
 export type UpdatedSubscribeEvent = {type: 'updated'; callback: (item: TodoItem) => void};
 export type CompletedSubscribeEvent = {type: 'completed'; callback: (id: number) => void};
-export type SubscribeEvent = AddedSubscribeEvent | DeletedSubscribeEvent | UpdatedSubscribeEvent | CompletedSubscribeEvent;
-
-function isAddedSubscribeEvent(event: SubscribeEvent): event is AddedSubscribeEvent {
-  return event.type === 'added';
-}
-
-function isDeletedSubscribeEvent(event: SubscribeEvent): event is DeletedSubscribeEvent {
-  return event.type === 'deleted';
-}
+export type SubscribeEvent = UpdatedSubscribeEvent | CompletedSubscribeEvent;
 
 function isUpdatedSubscribeEvent(event: SubscribeEvent): event is UpdatedSubscribeEvent {
   return event.type === 'updated';
@@ -67,53 +55,36 @@ export class App {
 
     updateCount();
 
-    const updateCountSubscribeEvent: UpdatedSubscribeEvent = {type: 'updated', callback() {
-      updateCount();
-    }};
-
-    const appendTodoElementSubscribeEvent: AddedSubscribeEvent = {type: 'added', callback: item => {
-      const newElement = document.createElement('li');
-      newElement.textContent = item.content;
-      newElement.id = `todo-item-${item.id}`;
-
-      const checkboxElement = document.createElement('input');
-      checkboxElement.setAttribute('type', 'checkbox');
-      checkboxElement.addEventListener('change', evt => {
-        evt.preventDefault();
-        const checked = (evt.target as HTMLInputElement).checked;
-        checkboxElement.checked = checked;
-        if (checked) {
-          this.complete(item.id);
-        } else {
-          this.uncomplete(item.id);
-        }
-      });
-
-      const deleteButtonElement = document.createElement('button');
-      deleteButtonElement.textContent = '削除';
-      deleteButtonElement.setAttribute('type', 'button');
-      deleteButtonElement.addEventListener('click', evt => {
-        evt.preventDefault();
-        this.delete(item.id);
-      });
-
-      render(checkboxElement, newElement);
-      render(deleteButtonElement, newElement);
-
-      if (todoListContainerElement.lastElementChild) {
-        render(newElement, todoListContainerElement.lastElementChild);
-      }
-    }};
-
-    this.subscribe(updateCountSubscribeEvent);
-    this.subscribe(appendTodoElementSubscribeEvent);
-
-    this.subscribe({type: 'deleted', callback(item) {
-      document.querySelector(`#todo-item-${item.id}`)?.remove();
-    }});
-
     this.subscribe({type: 'updated', callback: () => {
+      // this.items 更新時に DOM をまとめて入れ替える
+      const todoItemListElement = `<ul>${this.items.reduce((html, item) => html + `<li>${item.content}</li>`, '')}</ul>`;
+      todoListContainerElement.innerHTML = todoItemListElement;
+
+      // それぞれの li 要素に対してチェックボックスと削除ボタンの要素を追加する
+      for (const [index, item] of this.items.entries()) {
+        const todoItemElement = todoListContainerElement.lastElementChild?.children[index];
+        if (!todoItemElement) return;
+
+        // 要素を追加
+        todoItemElement.innerHTML = (item.completed ? `<input type="checkbox" class="checkbox" checked>${item.content}` : `<input type="checkbox" class="checkbox">${item.content}`) + '<button type="button" class="delete">×</button>';
+
+        todoItemElement.querySelector('input[type="checkbox"]')?.addEventListener('change', evt => {
+          console.log((evt.target as HTMLInputElement).checked);
+          if ((evt.target as HTMLInputElement).checked) {
+            this.complete(item.id);
+          } else {
+            this.uncomplete(item.id);
+          }
+        });
+
+        todoItemElement.querySelector('.delete')?.addEventListener('click', evt => {
+          evt.preventDefault();
+          this.delete(item.id);
+        });
+      }
+
       console.log('current items:', this.items);
+      updateCount();
     }});
 
     this.subscribe({type: 'completed', callback(id) {
@@ -157,12 +128,6 @@ export class App {
     const newItem = this.#createItem(content);
     this.items.push(newItem);
 
-    for (const event of this.#subscribedEvents.filter(event => event.type === 'added')) {
-      if (isAddedSubscribeEvent(event)) {
-        event.callback(newItem);
-      }
-    }
-
     for (const event of this.#subscribedEvents.filter(event => event.type === 'updated')) {
       if (isUpdatedSubscribeEvent(event)) {
         event.callback(newItem);
@@ -193,12 +158,6 @@ export class App {
     }
 
     this.items = this.items.filter(item => item.id !== id);
-
-    for (const event of this.#subscribedEvents.filter(event => event.type === 'deleted')) {
-      if (isDeletedSubscribeEvent(event)) {
-        event.callback(target);
-      }
-    }
 
     for (const event of this.#subscribedEvents.filter(event => event.type === 'updated')) {
       if (isUpdatedSubscribeEvent(event)) {
