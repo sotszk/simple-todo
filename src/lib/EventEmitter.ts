@@ -1,5 +1,5 @@
-export class EventEmitter {
-  #eventListeners = new Set<Map<string, () => void>>([]);
+export class EventEmitter<EventNames extends string[] = string[]> {
+  #eventListeners = new Set<Map<EventNames[number], () => void>>([]);
 
   addEventListener(eventName: 'change', callback: () => void) {
     const eventListener = new Map();

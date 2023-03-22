@@ -1,7 +1,7 @@
 import {EventEmitter} from './lib/EventEmitter';
 import {TodoItemModel} from './TodoItemModel';
 
-export class TodoListModel extends EventEmitter {
+export class TodoListModel extends EventEmitter<['change']> {
   static create() {
     return new TodoListModel();
   }
