@@ -1,5 +1,7 @@
 console.log('App.ts: loaded');
 
+let incrementalId = 0;
+
 export type TodoItem = {
   id: number;
   content: string;
@@ -7,16 +9,70 @@ export type TodoItem = {
   completed: boolean;
 };
 
-export type UpdatedSubscribeEvent = {type: 'updated'; callback: (item: TodoItem) => void};
-export type CompletedSubscribeEvent = {type: 'completed'; callback: (id: number) => void};
-export type SubscribeEvent = UpdatedSubscribeEvent | CompletedSubscribeEvent;
+export class EventEmitter {
+  #eventListeners = new Set<Map<string, () => void>>([]);
 
-function isUpdatedSubscribeEvent(event: SubscribeEvent): event is UpdatedSubscribeEvent {
-  return event.type === 'updated';
+  addEventListener(eventName: 'change', callback: () => void) {
+    const eventListener = new Map();
+    eventListener.set(eventName, callback);
+    this.#eventListeners.add(eventListener);
+  }
+
+  emit(eventName: 'change') {
+    this.#eventListeners.forEach(listener => {
+      listener.get(eventName)?.();
+    });
+  }
 }
 
-function isCompletedSubscribeEvent(event: SubscribeEvent): event is CompletedSubscribeEvent {
-  return event.type === 'completed';
+export class TodoListModel extends EventEmitter {
+  #todoItems: TodoItem[] = [];
+
+  getTotalCount() {
+    return this.#todoItems.length;
+  }
+
+  getAllItems() {
+    return this.#todoItems;
+  }
+
+  addTodo(content: string) {
+    incrementalId += 1;
+
+    this.#todoItems.push({
+      id: incrementalId,
+      content,
+      completed: false,
+      createdAt: Date.now(),
+    });
+    this.emitChange();
+  }
+
+  updateTodo({id, content, completed}: TodoItem) {
+    const targetItemIndex = this.#todoItems.findIndex(item => item.id === id);
+    if (targetItemIndex < 0) {
+      console.log('該当の todo item が見つかりませんでした');
+      return;
+    }
+
+    this.#todoItems[targetItemIndex] = {...this.#todoItems[targetItemIndex], completed, content};
+    this.emitChange();
+  }
+
+  deleteTodo(id: number) {
+    this.#todoItems = this.#todoItems.filter(item => item.id !== id);
+    this.emitChange();
+  }
+
+  onChange(listener: (items: TodoItem[]) => void) {
+    this.addEventListener('change', () => {
+      listener(this.#todoItems);
+    });
+  }
+
+  emitChange() {
+    this.emit('change');
+  }
 }
 
 export class App {
@@ -25,10 +81,6 @@ export class App {
     app.mount();
     return app;
   }
-
-  #incrementalId = 1;
-  #subscribedEvents: SubscribeEvent[] = [];
-  items: TodoItem[] = [];
 
   private constructor() {
     console.log('App initialized');
@@ -42,15 +94,15 @@ export class App {
       throw new Error('necessary elements do not found');
     }
 
-    todoListContainerElement.innerHTML = '<ul></ul>';
+    const todoList = new TodoListModel();
 
-    this.subscribe({type: 'updated', callback: () => {
+    todoList.onChange(todoItems => {
       // this.items 更新時に DOM をまとめて入れ替える
-      const todoItemListElement = `<ul>${this.items.reduce((html, item) => html + `<li>${item.content}</li>`, '')}</ul>`;
+      const todoItemListElement = `<ul>${todoItems.reduce((html, item) => html + `<li>${item.content}</li>`, '')}</ul>`;
       todoListContainerElement.innerHTML = todoItemListElement;
 
       // それぞれの li 要素に対してチェックボックスと削除ボタンの要素を追加する
-      for (const [index, item] of this.items.entries()) {
+      for (const [index, item] of todoItems.entries()) {
         const todoItemElement = todoListContainerElement.lastElementChild?.children[index];
         if (!todoItemElement) return;
 
@@ -60,25 +112,27 @@ export class App {
         todoItemElement.querySelector('input[type="checkbox"]')?.addEventListener('change', evt => {
           console.log((evt.target as HTMLInputElement).checked);
           if ((evt.target as HTMLInputElement).checked) {
-            this.complete(item.id);
+            todoList.updateTodo({...item, completed: true});
           } else {
-            this.uncomplete(item.id);
+            todoList.updateTodo({...item, completed: false});
           }
         });
 
         todoItemElement.querySelector('.delete')?.addEventListener('click', evt => {
           evt.preventDefault();
-          this.delete(item.id);
+          todoList.deleteTodo(item.id);
         });
       }
 
-      console.log('current items:', this.items);
-      this.#updateCount();
-    }});
+      const todoCountElement = document.querySelector<HTMLElement>('#js-todo-count');
+      if (todoCountElement?.textContent) {
+        const textSplitted = todoCountElement.textContent.split(':');
+        textSplitted[1] = ` ${todoList.getTotalCount()}`;
+        todoCountElement.textContent = textSplitted.join(':');
+      }
+    });
 
-    this.subscribe({type: 'completed', callback(id) {
-      console.log(`item id ${id} completed`);
-    }});
+    todoListContainerElement.innerHTML = '<ul></ul>';
 
     formElement.addEventListener('submit', evt => {
       evt.preventDefault();
@@ -88,89 +142,9 @@ export class App {
         return;
       }
 
-      this.add(inputItem.value);
+      todoList.addTodo(inputItem.value);
       inputItem.value = '';
       inputItem.focus();
     });
-
-    this.#updateCount();
-  }
-
-  #incrementId() {
-    this.#incrementalId++;
-  }
-
-  #updateCount() {
-    const todoCountElement = document.querySelector<HTMLElement>('#js-todo-count');
-    if (!todoCountElement?.textContent) return;
-
-    const textSplitted = todoCountElement.textContent.split(':');
-    textSplitted[1] = ` ${this.getCount()}`;
-    todoCountElement.textContent = textSplitted.join(':');
-  }
-
-  #createItem(content: string) {
-    const item: TodoItem = {
-      id: this.#incrementalId,
-      createdAt: Date.now(),
-      content,
-      completed: false,
-    };
-    this.#incrementId();
-    return item;
-  }
-
-  add(content: string) {
-    const newItem = this.#createItem(content);
-    this.items.push(newItem);
-
-    for (const event of this.#subscribedEvents.filter(event => event.type === 'updated')) {
-      if (isUpdatedSubscribeEvent(event)) {
-        event.callback(newItem);
-      }
-    }
-
-    console.log('new item added', newItem);
-  }
-
-  complete(id: number) {
-    this.items = this.items.map(item => (item.id === id ? {...item, completed: true} : item));
-
-    for (const event of this.#subscribedEvents.filter(event => event.type === 'completed')) {
-      if (isCompletedSubscribeEvent(event)) {
-        event.callback(id);
-      }
-    }
-  }
-
-  uncomplete(id: number) {
-    this.items = this.items.map(item => (item.id === id ? {...item, completed: false} : item));
-  }
-
-  delete(id: number) {
-    const target = this.items.find(item => item.id === id);
-    if (!target) {
-      throw new Error('delete target does not found');
-    }
-
-    this.items = this.items.filter(item => item.id !== id);
-
-    for (const event of this.#subscribedEvents.filter(event => event.type === 'updated')) {
-      if (isUpdatedSubscribeEvent(event)) {
-        event.callback(target);
-      }
-    }
-  }
-
-  getCount() {
-    return this.items.length;
-  }
-
-  subscribe(event: SubscribeEvent) {
-    this.#subscribedEvents.push(event);
-  }
-
-  unsubscribe(event: SubscribeEvent) {
-    this.#subscribedEvents = this.#subscribedEvents.filter(evt => evt !== event);
   }
 }
