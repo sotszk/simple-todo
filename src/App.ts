@@ -20,11 +20,17 @@ function isCompletedSubscribeEvent(event: SubscribeEvent): event is CompletedSub
 }
 
 export class App {
-  #currentId = 1;
+  static create() {
+    const app = new App();
+    app.mount();
+    return app;
+  }
+
+  #incrementalId = 1;
   #subscribedEvents: SubscribeEvent[] = [];
   items: TodoItem[] = [];
 
-  constructor() {
+  private constructor() {
     console.log('App initialized');
   }
 
@@ -91,7 +97,7 @@ export class App {
   }
 
   #incrementId() {
-    this.#currentId++;
+    this.#incrementalId++;
   }
 
   #updateCount() {
@@ -105,7 +111,7 @@ export class App {
 
   #createItem(content: string) {
     const item: TodoItem = {
-      id: this.#currentId,
+      id: this.#incrementalId,
       createdAt: Date.now(),
       content,
       completed: false,
