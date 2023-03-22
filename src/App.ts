@@ -20,40 +20,23 @@ function isCompletedSubscribeEvent(event: SubscribeEvent): event is CompletedSub
 }
 
 export class App {
-  #name: string;
   #currentId = 1;
   #subscribedEvents: SubscribeEvent[] = [];
   items: TodoItem[] = [];
 
-  constructor({name = 'Todo App'}: {name?: string} = {}) {
-    this.#name = name;
-
+  constructor() {
     console.log('App initialized');
   }
 
   mount() {
-    const todoCountElement = document.querySelector<HTMLElement>('#js-todo-count');
     const formElement = document.querySelector<HTMLFormElement>('#js-form');
     const todoListContainerElement = document.querySelector<HTMLDivElement>('#js-todo-list');
 
-    if (!todoCountElement || !formElement || !todoListContainerElement) {
-      console.log('necessary elements does not found');
-      return;
+    if (!formElement || !todoListContainerElement) {
+      throw new Error('necessary elements do not found');
     }
 
     todoListContainerElement.innerHTML = '<ul></ul>';
-
-    const updateCount = () => {
-      if (!todoCountElement?.textContent) {
-        return;
-      }
-
-      const textSplitted = todoCountElement.textContent.split(':');
-      textSplitted[1] = ` ${this.getCount()}`;
-      todoCountElement.textContent = textSplitted.join(':');
-    };
-
-    updateCount();
 
     this.subscribe({type: 'updated', callback: () => {
       // this.items 更新時に DOM をまとめて入れ替える
@@ -84,7 +67,7 @@ export class App {
       }
 
       console.log('current items:', this.items);
-      updateCount();
+      this.#updateCount();
     }});
 
     this.subscribe({type: 'completed', callback(id) {
@@ -103,14 +86,21 @@ export class App {
       inputItem.value = '';
       inputItem.focus();
     });
-  }
 
-  getName() {
-    return this.#name;
+    this.#updateCount();
   }
 
   #incrementId() {
     this.#currentId++;
+  }
+
+  #updateCount() {
+    const todoCountElement = document.querySelector<HTMLElement>('#js-todo-count');
+    if (!todoCountElement?.textContent) return;
+
+    const textSplitted = todoCountElement.textContent.split(':');
+    textSplitted[1] = ` ${this.getCount()}`;
+    todoCountElement.textContent = textSplitted.join(':');
   }
 
   #createItem(content: string) {
