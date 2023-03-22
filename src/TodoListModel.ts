@@ -37,7 +37,13 @@ export class TodoListModel extends EventEmitter {
   }
 
   deleteTodo(id: number) {
-    this.#todoItems = this.#todoItems.filter(item => item.id !== id);
+    const targetItemIndex = this.#todoItems.findIndex(item => item.id === id);
+    if (targetItemIndex < 0) {
+      console.log('該当の todo item が見つかりませんでした');
+      return;
+    }
+
+    this.#todoItems.splice(targetItemIndex, 1);
     this.emitChange();
   }
 
