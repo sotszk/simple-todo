@@ -1,79 +1,4 @@
-console.log('App.ts: loaded');
-
-let incrementalId = 0;
-
-export type TodoItem = {
-  id: number;
-  content: string;
-  createdAt: number;
-  completed: boolean;
-};
-
-export class EventEmitter {
-  #eventListeners = new Set<Map<string, () => void>>([]);
-
-  addEventListener(eventName: 'change', callback: () => void) {
-    const eventListener = new Map();
-    eventListener.set(eventName, callback);
-    this.#eventListeners.add(eventListener);
-  }
-
-  emit(eventName: 'change') {
-    this.#eventListeners.forEach(listener => {
-      listener.get(eventName)?.();
-    });
-  }
-}
-
-export class TodoListModel extends EventEmitter {
-  #todoItems: TodoItem[] = [];
-
-  getTotalCount() {
-    return this.#todoItems.length;
-  }
-
-  getAllItems() {
-    return this.#todoItems;
-  }
-
-  addTodo(content: string) {
-    incrementalId += 1;
-
-    this.#todoItems.push({
-      id: incrementalId,
-      content,
-      completed: false,
-      createdAt: Date.now(),
-    });
-    this.emitChange();
-  }
-
-  updateTodo({id, content, completed}: TodoItem) {
-    const targetItemIndex = this.#todoItems.findIndex(item => item.id === id);
-    if (targetItemIndex < 0) {
-      console.log('該当の todo item が見つかりませんでした');
-      return;
-    }
-
-    this.#todoItems[targetItemIndex] = {...this.#todoItems[targetItemIndex], completed, content};
-    this.emitChange();
-  }
-
-  deleteTodo(id: number) {
-    this.#todoItems = this.#todoItems.filter(item => item.id !== id);
-    this.emitChange();
-  }
-
-  onChange(listener: (items: TodoItem[]) => void) {
-    this.addEventListener('change', () => {
-      listener(this.#todoItems);
-    });
-  }
-
-  emitChange() {
-    this.emit('change');
-  }
-}
+import {TodoListModel} from './TodoListModel';
 
 export class App {
   static create() {
@@ -94,7 +19,7 @@ export class App {
       throw new Error('necessary elements do not found');
     }
 
-    const todoList = new TodoListModel();
+    const todoList = TodoListModel.create();
 
     todoList.onChange(todoItems => {
       // this.items 更新時に DOM をまとめて入れ替える
@@ -110,7 +35,6 @@ export class App {
         todoItemElement.innerHTML = (item.completed ? `<input type="checkbox" class="checkbox" checked>${item.content}` : `<input type="checkbox" class="checkbox">${item.content}`) + '<button type="button" class="delete">×</button>';
 
         todoItemElement.querySelector('input[type="checkbox"]')?.addEventListener('change', evt => {
-          console.log((evt.target as HTMLInputElement).checked);
           if ((evt.target as HTMLInputElement).checked) {
             todoList.updateTodo({...item, completed: true});
           } else {
