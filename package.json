@@ -15,13 +15,16 @@
   },
   "xo": {
     "space": true,
-    "prettier": false,
     "rules": {
       "import/extensions": "off",
       "unicorn/filename-case": "off",
       "capitalized-comments": "off",
       "unicorn/no-array-for-each": "off",
-      "curly": "off"
+      "curly": "off",
+      "@typescript-eslint/object-curly-spacing": [
+        "error",
+        "always"
+      ]
     }
   },
   "devDependencies": {

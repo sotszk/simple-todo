@@ -1,5 +1,5 @@
-import {EventEmitter} from './lib/EventEmitter';
-import {TodoItemModel} from './TodoItemModel';
+import { EventEmitter } from './lib/EventEmitter';
+import { TodoItemModel } from './TodoItemModel';
 
 export class TodoListModel extends EventEmitter<['change']> {
   static create() {
@@ -25,14 +25,14 @@ export class TodoListModel extends EventEmitter<['change']> {
     this.emitChange();
   }
 
-  updateTodo({id, content, completed}: TodoItemModel) {
+  updateTodo({ id, content, completed }: TodoItemModel) {
     const targetItemIndex = this.#todoItems.findIndex(item => item.id === id);
     if (targetItemIndex < 0) {
       console.log('該当の todo item が見つかりませんでした');
       return;
     }
 
-    this.#todoItems[targetItemIndex] = {...this.#todoItems[targetItemIndex], completed, content};
+    this.#todoItems[targetItemIndex] = { ...this.#todoItems[targetItemIndex], completed, content };
     this.emitChange();
   }
 
