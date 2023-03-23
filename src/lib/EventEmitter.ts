@@ -8,7 +8,7 @@ export class EventEmitter<EventNames extends string[] = string[]> {
   }
 
   emit(eventName: 'change') {
-    this.#eventListeners.forEach(listener => {
+    this.#eventListeners.forEach((listener) => {
       listener.get(eventName)?.();
     });
   }

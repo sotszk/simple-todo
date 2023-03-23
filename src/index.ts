@@ -1,4 +1,3 @@
-import { App } from './App';
+import {App} from './App';
 
-const app = App.create();
-
+App.create();

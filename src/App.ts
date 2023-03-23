@@ -1,4 +1,4 @@
-import { TodoListModel } from './TodoListModel';
+import {TodoListModel} from './TodoListModel';
 
 export class App {
   static create() {
@@ -13,8 +13,8 @@ export class App {
 
   mount() {
     const formElement = document.querySelector<HTMLFormElement>('#js-form');
-    const todoListContainerElement
-      = document.querySelector<HTMLDivElement>('#js-todo-list');
+    const todoListContainerElement =
+      document.querySelector<HTMLDivElement>('#js-todo-list');
 
     if (!formElement || !todoListContainerElement) {
       throw new Error('necessary elements do not found');
@@ -22,7 +22,7 @@ export class App {
 
     const todoList = TodoListModel.create();
 
-    todoList.onChange(todoItems => {
+    todoList.onChange((todoItems) => {
       // this.items 更新時に DOM をまとめて入れ替える
       const todoItemListElement = `<ul>${todoItems.reduce(
         (html, item) => html + `<li>${item.content}</li>`,
@@ -32,37 +32,36 @@ export class App {
 
       // それぞれの li 要素に対してチェックボックスと削除ボタンの要素を追加する
       for (const [index, item] of todoItems.entries()) {
-        const todoItemElement
-          = todoListContainerElement.lastElementChild?.children[index];
+        const todoItemElement =
+          todoListContainerElement.lastElementChild?.children[index];
         if (!todoItemElement) return;
 
-        // 要素を追加
-        todoItemElement.innerHTML
-          = (item.completed
+        todoItemElement.innerHTML =
+          (item.completed
             ? `<input type="checkbox" class="checkbox" checked>${item.content}`
-            : `<input type="checkbox" class="checkbox">${item.content}`)
-          + '<button type="button" class="delete">×</button>';
+            : `<input type="checkbox" class="checkbox">${item.content}`) +
+          '<button type="button" class="delete">×</button>';
 
         todoItemElement
           .querySelector('input[type="checkbox"]')
-          ?.addEventListener('change', evt => {
+          ?.addEventListener('change', (evt) => {
             if ((evt.target as HTMLInputElement).checked) {
-              todoList.updateTodo({ ...item, completed: true });
+              todoList.updateTodo({...item, completed: true});
             } else {
-              todoList.updateTodo({ ...item, completed: false });
+              todoList.updateTodo({...item, completed: false});
             }
           });
 
         todoItemElement
           .querySelector('.delete')
-          ?.addEventListener('click', evt => {
+          ?.addEventListener('click', (evt) => {
             evt.preventDefault();
             todoList.deleteTodo(item.id);
           });
       }
 
-      const todoCountElement
-        = document.querySelector<HTMLElement>('#js-todo-count');
+      const todoCountElement =
+        document.querySelector<HTMLElement>('#js-todo-count');
       if (todoCountElement?.textContent) {
         const textSplitted = todoCountElement.textContent.split(':');
         textSplitted[1] = ` ${todoList.getTotalCount()}`;
@@ -72,7 +71,7 @@ export class App {
 
     todoListContainerElement.innerHTML = '<ul></ul>';
 
-    formElement.addEventListener('submit', evt => {
+    formElement.addEventListener('submit', (evt) => {
       evt.preventDefault();
       const inputItem = formElement.elements[0] as HTMLInputElement;
       if (!inputItem) {
