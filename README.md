@@ -17,8 +17,8 @@ Vanilla JS によるシンプルな TODO アプリを実装します
 - [x] エントリーポイントの実装
 - [x] Todo App の見た目を整える
 - [x] とりあえず動くものを考えて実装してみる
-- [ ] JS Primer の実装をみる
-- [ ] Todo App のブラッシュアップ
+- [x] JS Primer の実装をみる
+- [x] Todo App のブラッシュアップ
 
 ### TypeScript キャッチアップ
 
