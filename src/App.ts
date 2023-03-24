@@ -1,4 +1,4 @@
-import {TodoListModel} from './TodoListModel';
+import { TodoListModel } from "./TodoListModel";
 
 export class App {
   static create() {
@@ -8,25 +8,25 @@ export class App {
   }
 
   private constructor() {
-    console.log('App initialized');
+    console.log("App initialized");
   }
 
   mount() {
-    const formElement = document.querySelector<HTMLFormElement>('#js-form');
+    const formElement = document.querySelector<HTMLFormElement>("#js-form");
     const todoListContainerElement =
-      document.querySelector<HTMLDivElement>('#js-todo-list');
+      document.querySelector<HTMLDivElement>("#js-todo-list");
 
     if (!formElement || !todoListContainerElement) {
-      throw new Error('necessary elements do not found');
+      throw new Error("necessary elements do not found");
     }
 
     const todoList = TodoListModel.create();
 
     todoList.onChange((todoItems) => {
-      // this.items 更新時に DOM をまとめて入れ替える
+      // This.items 更新時に DOM をまとめて入れ替える
       const todoItemListElement = `<ul>${todoItems.reduce(
         (html, item) => html + `<li>${item.content}</li>`,
-        '',
+        "",
       )}</ul>`;
       todoListContainerElement.innerHTML = todoItemListElement;
 
@@ -44,43 +44,43 @@ export class App {
 
         todoItemElement
           .querySelector('input[type="checkbox"]')
-          ?.addEventListener('change', (evt) => {
-            if ((evt.target as HTMLInputElement).checked) {
-              todoList.updateTodo({...item, completed: true});
+          ?.addEventListener("change", (event_) => {
+            if ((event_.target as HTMLInputElement).checked) {
+              todoList.updateTodo({ ...item, completed: true });
             } else {
-              todoList.updateTodo({...item, completed: false});
+              todoList.updateTodo({ ...item, completed: false });
             }
           });
 
         todoItemElement
-          .querySelector('.delete')
-          ?.addEventListener('click', (evt) => {
-            evt.preventDefault();
+          .querySelector(".delete")
+          ?.addEventListener("click", (event_) => {
+            event_.preventDefault();
             todoList.deleteTodo(item.id);
           });
       }
 
       const todoCountElement =
-        document.querySelector<HTMLElement>('#js-todo-count');
+        document.querySelector<HTMLElement>("#js-todo-count");
       if (todoCountElement?.textContent) {
-        const textSplitted = todoCountElement.textContent.split(':');
+        const textSplitted = todoCountElement.textContent.split(":");
         textSplitted[1] = ` ${todoList.getTotalCount()}`;
-        todoCountElement.textContent = textSplitted.join(':');
+        todoCountElement.textContent = textSplitted.join(":");
       }
     });
 
-    todoListContainerElement.innerHTML = '<ul></ul>';
+    todoListContainerElement.innerHTML = "<ul></ul>";
 
-    formElement.addEventListener('submit', (evt) => {
-      evt.preventDefault();
+    formElement.addEventListener("submit", (event_) => {
+      event_.preventDefault();
       const inputItem = formElement.elements[0] as HTMLInputElement;
       if (!inputItem) {
-        console.log('form item does not found');
+        console.log("form item does not found");
         return;
       }
 
       todoList.addTodo(inputItem.value);
-      inputItem.value = '';
+      inputItem.value = "";
       inputItem.focus();
     });
   }

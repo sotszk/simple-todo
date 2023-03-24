@@ -1,0 +1,12 @@
+root: true
+extends:
+  - xo/browser
+  - xo-typescript/space
+  - plugin:unicorn/recommended
+  - plugin:prettier/recommended
+plugins:
+  - prettier
+rules:
+  capitalized-comments: off
+  unicorn/filename-case: off
+  unicorn/no-array-for-each: off

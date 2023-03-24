@@ -1,7 +1,7 @@
-import {EventEmitter} from './lib/EventEmitter';
-import {TodoItemModel} from './TodoItemModel';
+import { EventEmitter } from "./lib/EventEmitter";
+import { TodoItemModel } from "./TodoItemModel";
 
-export class TodoListModel extends EventEmitter<['change']> {
+export class TodoListModel extends EventEmitter<["change"]> {
   static create() {
     return new TodoListModel();
   }
@@ -25,10 +25,10 @@ export class TodoListModel extends EventEmitter<['change']> {
     this.emitChange();
   }
 
-  updateTodo({id, content, completed}: TodoItemModel) {
+  updateTodo({ id, content, completed }: TodoItemModel) {
     const targetItemIndex = this.#todoItems.findIndex((item) => item.id === id);
     if (targetItemIndex < 0) {
-      console.log('該当の todo item が見つかりませんでした');
+      console.log("該当の todo item が見つかりませんでした");
       return;
     }
 
@@ -43,7 +43,7 @@ export class TodoListModel extends EventEmitter<['change']> {
   deleteTodo(id: number) {
     const targetItemIndex = this.#todoItems.findIndex((item) => item.id === id);
     if (targetItemIndex < 0) {
-      console.log('該当の todo item が見つかりませんでした');
+      console.log("該当の todo item が見つかりませんでした");
       return;
     }
 
@@ -52,12 +52,12 @@ export class TodoListModel extends EventEmitter<['change']> {
   }
 
   onChange(listener: (items: TodoItemModel[]) => void) {
-    this.addEventListener('change', () => {
+    this.addEventListener("change", () => {
       listener(this.#todoItems);
     });
   }
 
   emitChange() {
-    this.emit('change');
+    this.emit("change");
   }
 }
