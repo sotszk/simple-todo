@@ -1,4 +1,7 @@
+import invariant from "tiny-invariant";
+
 import { TodoListModel } from "./TodoListModel";
+import { render, element } from "./lib/html-util";
 
 export class App {
   static create() {
@@ -16,31 +19,35 @@ export class App {
     const todoListContainerElement =
       document.querySelector<HTMLDivElement>("#js-todo-list");
 
-    if (!formElement || !todoListContainerElement) {
-      throw new Error("necessary elements do not found");
-    }
+    invariant(
+      formElement !== null && todoListContainerElement !== null,
+      "必要な要素がドキュメント上に存在していません",
+    );
 
     const todoList = TodoListModel.create();
 
     todoList.onChange((todoItems) => {
       // This.items 更新時に DOM をまとめて入れ替える
-      const todoItemListElement = `<ul>${todoItems.reduce(
-        (html, item) => html + `<li>${item.content}</li>`,
-        "",
-      )}</ul>`;
-      todoListContainerElement.innerHTML = todoItemListElement;
+      const todoListElement = element`<ul></ul>`;
+      invariant(todoListElement !== null);
 
-      // それぞれの li 要素に対してチェックボックスと削除ボタンの要素を追加する
-      for (const [index, item] of todoItems.entries()) {
-        const todoItemElement =
-          todoListContainerElement.lastElementChild?.children[index];
-        if (!todoItemElement) return;
+      // リストにTODOアイテム要素を追加する
+      for (const item of todoItems) {
+        const todoItemElement = element`<li></li>`;
+        invariant(todoItemElement !== null);
 
-        todoItemElement.innerHTML =
-          (item.completed
-            ? `<input type="checkbox" class="checkbox" checked>${item.content}`
-            : `<input type="checkbox" class="checkbox">${item.content}`) +
-          '<button type="button" class="delete">×</button>';
+        const checkboxElement = item.completed
+          ? element`<input type="checkbox" class="checkbox" checked>`
+          : element`<input type="checkbox" class="checkbox">`;
+        invariant(checkboxElement !== null);
+
+        const deleteButtonElement = element`<button type="button" class="delete">x</button>`;
+        invariant(deleteButtonElement !== null);
+
+        todoItemElement.append(checkboxElement);
+        todoItemElement.append(item.content);
+        todoItemElement.append(deleteButtonElement);
+        todoListElement.append(todoItemElement);
 
         todoItemElement
           .querySelector('input[type="checkbox"]')
@@ -60,16 +67,17 @@ export class App {
           });
       }
 
-      const todoCountElement =
-        document.querySelector<HTMLElement>("#js-todo-count");
-      if (todoCountElement?.textContent) {
-        const textSplitted = todoCountElement.textContent.split(":");
-        textSplitted[1] = ` ${todoList.getTotalCount()}`;
-        todoCountElement.textContent = textSplitted.join(":");
-      }
-    });
+      render(todoListElement, todoListContainerElement);
 
-    todoListContainerElement.innerHTML = "<ul></ul>";
+      const countContainerElement =
+        document.querySelector<HTMLElement>("#js-todo-count");
+      invariant(countContainerElement !== null);
+
+      const countElement = element`<span>Todoアイテム数: ${todoList.getTotalCount()}</span>`;
+      invariant(countElement !== null);
+
+      render(countElement, countContainerElement);
+    });
 
     formElement.addEventListener("submit", (event_) => {
       event_.preventDefault();
