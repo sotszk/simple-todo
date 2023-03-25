@@ -1,7 +1,7 @@
 import { EventEmitter } from "./lib/EventEmitter";
 import { TodoItemModel } from "./TodoItemModel";
 
-export class TodoListModel extends EventEmitter<["change"]> {
+export class TodoListModel extends EventEmitter<"change"> {
   static create() {
     return new TodoListModel();
   }
@@ -51,9 +51,9 @@ export class TodoListModel extends EventEmitter<["change"]> {
     this.emitChange();
   }
 
-  onChange(listener: (items: TodoItemModel[]) => void) {
+  onChange(handleChange: (items: TodoItemModel[]) => void) {
     this.addEventListener("change", () => {
-      listener(this.#todoItems);
+      handleChange(this.#todoItems);
     });
   }
 

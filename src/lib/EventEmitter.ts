@@ -1,14 +1,34 @@
-export class EventEmitter<EventNames extends string[] = string[]> {
-  #eventListeners = new Set<Map<EventNames[number], () => void>>([]);
+type Listener = () => void;
+type EventListeners<T extends string> = Map<T, Set<Listener>>;
 
-  addEventListener(eventName: EventNames[number], callback: () => void) {
-    const eventListener = new Map([[eventName, callback]]);
-    this.#eventListeners.add(eventListener);
+export class EventEmitter<EventName extends string = string> {
+  #eventListeners: EventListeners<EventName> = new Map();
+
+  addEventListener(eventName: EventName, listener: Listener) {
+    const listeners = this.#eventListeners.get(eventName);
+    if (listeners) {
+      listeners.add(listener);
+      return;
+    }
+
+    this.#eventListeners.set(eventName, new Set([listener]));
   }
 
-  emit(eventName: "change") {
-    this.#eventListeners.forEach((listener) => {
-      listener.get(eventName)?.();
+  removeEventListener(eventName: EventName, listener: Listener) {
+    const listeners = this.#eventListeners.get(eventName);
+    if (listeners) {
+      listeners.delete(listener);
+    }
+  }
+
+  emit(eventName: EventName) {
+    const listeners = this.#eventListeners.get(eventName);
+    if (!listeners) {
+      return;
+    }
+
+    listeners.forEach((listener) => {
+      listener.call(this);
     });
   }
 }
