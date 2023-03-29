@@ -3,17 +3,38 @@ import invariant from "tiny-invariant";
 import { type TodoItemModel } from "../TodoItemModel";
 import { element } from "../lib/html-util";
 
+export type OnUpdateTodo = (
+  todoItem: Pick<TodoItemModel, "id" | "completed">,
+) => void;
+
+export type OnDeleteTodo = (todoId: number) => void;
+
 export class TodoItemView {
+  static create() {
+    return new TodoItemView();
+  }
+
+  // Factory パターン強制のため
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private constructor() {}
+
+  /**
+   * Todo アイテム要素を作成して返します
+   * @param {TodoItemModel} todoItem TodoItemModel のインスタンス
+   * @param {(todoItem: Pick<TodoItemModel, "id" | "completed">) => void} onUpdateTodo
+   * @param {(todoId: number) => void} onDeleteTodo
+   * @returns {Element} li 要素
+   */
   createElement(
     todoItem: TodoItemModel,
     {
       onUpdateTodo,
       onDeleteTodo,
     }: {
-      onUpdateTodo: (todoItem: TodoItemModel) => void;
-      onDeleteTodo: (todoId: number) => void;
+      onUpdateTodo: OnUpdateTodo;
+      onDeleteTodo: OnDeleteTodo;
     },
-  ) {
+  ): Element {
     const todoItemElement = element`<li></li>`;
     invariant(todoItemElement !== null);
 

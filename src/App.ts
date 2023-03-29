@@ -1,7 +1,7 @@
 import invariant from "tiny-invariant";
 
 import { TodoListModel } from "./TodoListModel";
-import { TodoItemView } from "./view/TodoItemView";
+import { TodoListView } from "./view/TodoListView";
 import { render, element } from "./lib/html-util";
 
 export class App {
@@ -26,27 +26,17 @@ export class App {
     );
 
     const todoList = TodoListModel.create();
+    const todoListView = TodoListView.create();
 
     todoList.onChange((todoItems) => {
-      // This.items 更新時に DOM をまとめて入れ替える
-      const todoListElement = element`<ul></ul>`;
-      invariant(todoListElement !== null);
-
-      const todoItemView = new TodoItemView();
-
-      // リストにTODOアイテム要素を追加する
-      for (const item of todoItems) {
-        const todoItemElement = todoItemView.createElement(item, {
-          onUpdateTodo(item) {
-            todoList.updateTodo(item);
-          },
-          onDeleteTodo(id) {
-            todoList.deleteTodo(id);
-          },
-        });
-
-        todoListElement.append(todoItemElement);
-      }
+      const todoListElement = todoListView.createElement(todoItems, {
+        onUpdateTodo(item) {
+          todoList.updateTodo(item);
+        },
+        onDeleteTodo(id) {
+          todoList.deleteTodo(id);
+        },
+      });
 
       render(todoListElement, todoListContainerElement);
 

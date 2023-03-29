@@ -25,7 +25,7 @@ export class TodoListModel extends EventEmitter<"change"> {
     this.emitChange();
   }
 
-  updateTodo({ id, content, completed }: TodoItemModel) {
+  updateTodo({ id, completed }: Pick<TodoItemModel, "id" | "completed">) {
     const targetItemIndex = this.#todoItems.findIndex((item) => item.id === id);
     if (targetItemIndex < 0) {
       console.log("該当の todo item が見つかりませんでした");
@@ -35,7 +35,6 @@ export class TodoListModel extends EventEmitter<"change"> {
     this.#todoItems[targetItemIndex] = {
       ...this.#todoItems[targetItemIndex],
       completed,
-      content,
     };
     this.emitChange();
   }
