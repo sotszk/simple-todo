@@ -1,6 +1,7 @@
 import invariant from "tiny-invariant";
 
 import { TodoListModel } from "./TodoListModel";
+import { TodoItemView } from "./view/TodoItemView";
 import { render, element } from "./lib/html-util";
 
 export class App {
@@ -31,40 +32,20 @@ export class App {
       const todoListElement = element`<ul></ul>`;
       invariant(todoListElement !== null);
 
+      const todoItemView = new TodoItemView();
+
       // リストにTODOアイテム要素を追加する
       for (const item of todoItems) {
-        const todoItemElement = element`<li></li>`;
-        invariant(todoItemElement !== null);
+        const todoItemElement = todoItemView.createElement(item, {
+          onUpdateTodo(item) {
+            todoList.updateTodo(item);
+          },
+          onDeleteTodo(id) {
+            todoList.deleteTodo(id);
+          },
+        });
 
-        const checkboxElement = item.completed
-          ? element`<input type="checkbox" class="checkbox" checked>`
-          : element`<input type="checkbox" class="checkbox">`;
-        invariant(checkboxElement !== null);
-
-        const deleteButtonElement = element`<button type="button" class="delete">x</button>`;
-        invariant(deleteButtonElement !== null);
-
-        todoItemElement.append(checkboxElement);
-        todoItemElement.append(item.content);
-        todoItemElement.append(deleteButtonElement);
         todoListElement.append(todoItemElement);
-
-        todoItemElement
-          .querySelector('input[type="checkbox"]')
-          ?.addEventListener("change", (event_) => {
-            if ((event_.target as HTMLInputElement).checked) {
-              todoList.updateTodo({ ...item, completed: true });
-            } else {
-              todoList.updateTodo({ ...item, completed: false });
-            }
-          });
-
-        todoItemElement
-          .querySelector(".delete")
-          ?.addEventListener("click", (event_) => {
-            event_.preventDefault();
-            todoList.deleteTodo(item.id);
-          });
       }
 
       render(todoListElement, todoListContainerElement);
