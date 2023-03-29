@@ -3,9 +3,7 @@ import invariant from "tiny-invariant";
 import { type TodoItemModel } from "../TodoItemModel";
 import { element } from "../lib/html-util";
 
-export type OnUpdateTodo = (
-  todoItem: Pick<TodoItemModel, "id" | "completed">,
-) => void;
+export type OnUpdateTodo = (todoItem: TodoItemModel) => void;
 
 export type OnDeleteTodo = (todoId: number) => void;
 

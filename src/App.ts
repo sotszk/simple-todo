@@ -1,6 +1,7 @@
 import invariant from "tiny-invariant";
 
 import { TodoListModel } from "./TodoListModel";
+import { type TodoItemModel } from "./TodoItemModel";
 import { TodoListView } from "./view/TodoListView";
 import { render, element } from "./lib/html-util";
 
@@ -11,6 +12,10 @@ export class App {
     return app;
   }
 
+  #todoListModel = TodoListModel.create();
+  #todoListView = TodoListView.create();
+
+  // Factory パターン強制のため
   private constructor() {
     console.log("App initialized");
   }
@@ -25,29 +30,14 @@ export class App {
       "必要な要素がドキュメント上に存在していません",
     );
 
-    const todoList = TodoListModel.create();
-    const todoListView = TodoListView.create();
-
-    todoList.onChange((todoItems) => {
-      const todoListElement = todoListView.createElement(todoItems, {
-        onUpdateTodo(item) {
-          todoList.updateTodo(item);
-        },
-        onDeleteTodo(id) {
-          todoList.deleteTodo(id);
-        },
+    this.#todoListModel.onChange((todoItems) => {
+      const todoListElement = this.#todoListView.createElement(todoItems, {
+        onUpdateTodo: this.#handleUpdateTodo,
+        onDeleteTodo: this.#handleDeleteTodo,
       });
 
       render(todoListElement, todoListContainerElement);
-
-      const countContainerElement =
-        document.querySelector<HTMLElement>("#js-todo-count");
-      invariant(countContainerElement !== null);
-
-      const countElement = element`<span>Todoアイテム数: ${todoList.getTotalCount()}</span>`;
-      invariant(countElement !== null);
-
-      render(countElement, countContainerElement);
+      this.#renderTodoCount(this.#todoListModel.getTotalCount());
     });
 
     formElement.addEventListener("submit", (event_) => {
@@ -58,9 +48,28 @@ export class App {
         return;
       }
 
-      todoList.addTodo(inputItem.value);
+      this.#todoListModel.addTodo(inputItem.value);
       inputItem.value = "";
       inputItem.focus();
     });
+  }
+
+  #handleUpdateTodo(item: TodoItemModel) {
+    this.#todoListModel.updateTodo(item);
+  }
+
+  #handleDeleteTodo(id: number) {
+    this.#todoListModel.deleteTodo(id);
+  }
+
+  #renderTodoCount(count: number) {
+    const countContainerElement =
+      document.querySelector<HTMLElement>("#js-todo-count");
+    invariant(countContainerElement !== null);
+
+    const countElement = element`<span>Todoアイテム数: ${count}</span>`;
+    invariant(countElement !== null);
+
+    render(countElement, countContainerElement);
   }
 }
